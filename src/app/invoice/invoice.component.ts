@@ -1,6 +1,5 @@
-import { formatDate } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { InvoiceService } from '../invoice.service';
 
 
@@ -15,12 +14,17 @@ export class InvoiceComponent implements OnInit {
 
   invoiceDetails:any [] = [];
   id = "";
+  deleteId = "";
   invoiceId = "";
+  updatedId = "";
   customerName = "";
   date = "";
   itemsCount = "";
   totalAmount = "";
-  constructor(public _InvoiceService: InvoiceService) {
+  addFlag = false;
+  updateFlag =false;
+
+  constructor(public _InvoiceService: InvoiceService, public fb: FormBuilder) {
     
   }
 
@@ -37,6 +41,11 @@ export class InvoiceComponent implements OnInit {
   }
 
   
+  DeleteInvoice(){
+    this._InvoiceService.sendDeleteRequest(this.deleteId).subscribe((data)=>{
+      window.alert("invoice has been deleted..")
+    })
+  }
 
   public addForm: FormGroup = new FormGroup({
     invoiceId: new FormControl(null, Validators.required),
@@ -47,12 +56,12 @@ export class InvoiceComponent implements OnInit {
     item: new FormControl(null, Validators.required),
     price: new FormControl(null, Validators.required),
     quantity: new FormControl(null, Validators.required),
-    totalItemsAmount: new FormControl(null, Validators.required)
+    itemAmount: new FormControl(null, Validators.required)
   });
 
-  save(addForm: FormGroup) {
+  add(addForm: FormGroup) {
     const { invoiceId, customerName, dateTime, itemsCount,
-      totalAmount, item, price, quantity, totalItemsAmount } = addForm.value
+      totalAmount, item, price, quantity, itemAmount } = addForm.value
 
     const formatedData = {
       invoiceId,
@@ -64,23 +73,59 @@ export class InvoiceComponent implements OnInit {
         item,
         price,
         quantity,
-        totalItemsAmount
+        itemAmount
       }]
-    }
-
-    this._InvoiceService.sendUpdateRequest(formatedData, this.id)
-    
-
-    window.alert("Invoice is added !");
-
+    }    
 
     console.log(formatedData);
+
     this._InvoiceService.sendPostRequest(formatedData).subscribe((response: any) => {
       console.warn("Resulted Object : ", response);
     });
 
-    window.alert("Invoice is added !");
+    window.alert("Invoice has been added ..");
   }
+
+  update(addForm: FormGroup){
+    const  { invoiceId, customerName, dateTime, itemsCount,
+      totalAmount, item, price, quantity, itemAmount } = addForm.value
+
+    const formatedData = {
+      invoiceId,
+      customerName,
+      dateTime,
+      itemsCount,
+      totalAmount,
+      invoiceDetails: [{
+        item,
+        price,
+        quantity,
+        itemAmount
+      }]
+    }  
+    
+    console.log(formatedData)
+    
+    this._InvoiceService.sendUpdateRequest(formatedData, this.updatedId).subscribe((response: any)=> {
+      console.warn(response);
+    })
+    window.alert("Invoice updated ..")
+  }
+
+  AddButton(){
+    this.updateFlag = false;
+    return this.addFlag = true; 
+  }
+
+  UpdateButton(){
+    this.addFlag = false;
+    return this.updateFlag = true;
+  }
+
+  clear(){
+    this.addForm.reset();
+  }
+
 
   ngOnInit(): void {
   }

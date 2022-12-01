@@ -21,12 +21,11 @@ export class InvoiceService {
 
   sendUpdateRequest(formData:any, id:any):Observable<any>
   {
-    return this._HttpClient.put(`https://localhost:44319/api/invoices/update${id}`, formData);
+    return this._HttpClient.put(`https://localhost:44319/api/invoices/update?id=${id}`, formData);
   }
 
-  update(data: any, id: any){
-    this.sendUpdateRequest(data, id).subscribe((response: any)=>{
-      console.warn("Resulted Object : ", response);
-    })
+  sendDeleteRequest(id: any):Observable<any>
+  {
+    return this._HttpClient.delete(`https://localhost:44319/api/invoices/delete?id=${id}`)
   }
 }

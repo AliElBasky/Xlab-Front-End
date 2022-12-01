@@ -1,22 +1,43 @@
-<p>invoice works!</p>
-<div class="row">
+<div>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid justify-content-center">
+        <div class="d-flex">
+        <input class="form-control mx-1" [(ngModel)]="id" type="text">
+        <button (click)="GetInvoice()" class="btn btn-outline-success" type="submit">Search</button>
+        </div>
+        </div>
+        </nav>
+</div>
+
+
+
+<!-- <div class="row">
     <div class="col-md-4 m-auto text-center">
         <input class="form-control mt-5" [(ngModel)]="id" type="text">
         <button (click)="GetInvoice()" class="w-50 btn btn-info">Search</button>
     </div>
-</div>
+</div> -->
+
+
 <br><br>
 <div class="w-25 m-auto text-left">
     <label>invoice ID:</label>
     <input class="form-control" [(ngModel)]="invoiceId" type="text">
 </div>
+
 <br>
-<div class="w-50 m-auto d-flex text-center">
-    <label>Customer Name:</label>
-    <input class="form-control" [(ngModel)]="customerName" type="text">
-    <label>Date:</label>
-    <input class="form-control" [(ngModel)]="date" type="text">
+
+<div class="w-50 m-auto d-flex">
+    <div class="w-50 mx-2">
+        <label>Customer Name:</label>
+        <input class="form-control" [(ngModel)]="customerName" type="text">
+    </div>
+    <div class="w-50">
+        <label>Date:</label>
+        <input class="form-control" [(ngModel)]="date" type="text">
+    </div>
 </div>
+
 <br><br>
 
 <table class="table w-75 m-auto text-center">
@@ -36,12 +57,12 @@
             <td>{{element.totalAmount}}</td>
         </tr>
     </tbody>
-</table>
+    </table>
 
 
 <br><br>
-<div class="w-50 m-auto d-flex text-center">
-    <div class="w-50 ">
+<div class="w-50 m-auto d-flex">
+    <div class="w-50 mx-2">
         <label>Quantity:</label>
         <input class="form-control" [(ngModel)]="itemsCount" type="text">
     </div>
@@ -52,14 +73,54 @@
     
 </div>
 
+
 <br>
+<div class="row mt-5">
+    <div class="w-25 m-auto text-left">
+        <label>DeleteInvoice:</label>
+        <div class="d-flex">
+            <input class="form-control" [(ngModel)]="deleteId" type="text">
+            <button (click)="DeleteInvoice()" class="btn btn-outline-danger">Delete</button>
+        </div>
+        
+    </div>
+</div>
 <br>
-<form [formGroup]="addForm" (ngSubmit)="save(addForm)">
+
+
+<div class="border border-2 mt-5"></div>
+
+<br>
+
+
+<div class="m-auto d-flex justify-content-center">
+    <div class="w-25">
+        <button (click)="AddButton()" class="w-50 btn btn-outline-info">add invoice</button>
+    </div>
+    <div class="w-25">
+        <button (click)="UpdateButton()" class="w-50 btn btn-outline-info">update invoice</button>
+    </div>
+    <div class="w-25">
+        <button (click)="clear()" class="w-50 btn btn-outline-danger">Clear Form</button>
+     </div>
+</div>
+
+
+ 
+
+<br>
+<form [formGroup]="addForm" (ngSubmit)="add(addForm)" *ngIf="addFlag">
+
+    <div class="text-center mt-5">
+        <h2>Add New Invoice</h2>
+    </div>
+
+
     <div class="row m-5">
         <div class="col-xs-2">
             <div class="form-group  mt-3">
                 <label for="exampleFormControlInput1">invoice ID</label>
-                <input class="form-control" formControlName="invoiceId" type="text">
+                <input class="form-control" formControlName="invoiceId" [(ngModel)]="updatedId" type="text">
             </div>
             <div class="form-group mt-3">
                 <label for="exampleFormControlTextarea1">Customer name</label>
@@ -90,12 +151,64 @@
                 <input class="form-control" formControlName="quantity" type="number">
             </div>
             <div class="form-group  mt-3">
-                <label for="exampleFormControlInput1">Total Items Amount</label>
-                <input class="form-control" formControlName="totalItemsAmount" type="number">
-            </div>
-           
-            <button type="submit" class="btn btn-secondary mt-3">Add Invoive</button>
-            <button type="submit" class="btn btn-secondary mt-3">Update Invoice</button>
+                <label for="exampleFormControlInput1">Item Amount</label>
+                <input class="form-control" formControlName="itemAmount" type="number">
+            </div>            
+               
+            <button type="submit" [disabled]="addForm.invalid" class="btn btn-outline-secondary mt-3">Add Invoice</button>
         </div>
     </div>
 </form>
+
+<form [formGroup]="addForm" (ngSubmit)="update(addForm)" *ngIf="updateFlag">
+
+    <div class="text-center mt-5">
+        <h2>Update Invoice</h2>
+    </div>
+
+
+    <div class="row m-5">
+        <div class="col-xs-2">
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">invoice ID</label>
+                <input class="form-control" formControlName="invoiceId" [(ngModel)]="updatedId" type="text">
+            </div>
+            <div class="form-group mt-3">
+                <label for="exampleFormControlTextarea1">Customer name</label>
+                <input class="form-control" formControlName="customerName" type="text">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">date & Time</label>
+                <input class="form-control" formControlName="dateTime" type="date">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">items Count</label>
+                <input class="form-control" formControlName="itemsCount" type="number">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">Total Amount</label>
+                <input class="form-control" formControlName="totalAmount" type="number">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">Item</label>
+                <input class="form-control" formControlName="item" type="text">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">Price</label>
+                <input class="form-control" formControlName="price" type="number">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">Quantity</label>
+                <input class="form-control" formControlName="quantity" type="number">
+            </div>
+            <div class="form-group  mt-3">
+                <label for="exampleFormControlInput1">Item Amount</label>
+                <input class="form-control" formControlName="itemAmount" type="number">
+            </div>
+           
+            <button type="submit" [disabled]="addForm.invalid" class="btn btn-outline-secondary mt-3">Update Invoice</button>
+        </div>
+    </div>
+</form>
+
+
