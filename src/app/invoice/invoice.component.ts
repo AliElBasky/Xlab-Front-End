@@ -11,57 +11,69 @@ import { InvoiceService } from '../invoice.service';
 })
 export class InvoiceComponent implements OnInit {
 
-
-  invoiceDetails:any [] = [];
-  id = "";
-  deleteId = "";
-  invoiceId = "";
-  updatedId = "";
-  customerName = "";
-  date = "";
-  itemsCount = "";
-  totalAmount = "";
+  getInvoiceDetails: any[] = [];
+  id: any;
+  deleteId: any;
+  invoiceId: any;
+  updatedId: any;
+  customerName: any;
+  date: any;
+  itemsCount: any;
+  totalAmount: any;
   addFlag = false;
-  updateFlag =false;
+  updateFlag = false;
+  errorMessage: any;
+  invoiceForm: any;
 
-  constructor(public _InvoiceService: InvoiceService, public fb: FormBuilder) {
-    
+  constructor(private _InvoiceService: InvoiceService, private fb: FormBuilder) {
+
   }
 
-
-  GetInvoice(){
-      this._InvoiceService.sendGetRequest(this.id).subscribe((data)=>{
+  GetInvoice(id: any) {
+    this._InvoiceService.sendGetRequest(id).subscribe((data) => {
       this.invoiceId = data.invoiceId;
       this.customerName = data.customerName;
       this.date = data.dateTime;
       this.itemsCount = data.itemsCount;
       this.totalAmount = data.totalAmount;
-      this.invoiceDetails = data.invoiceDetails
+      this.getInvoiceDetails = data.invoiceDetails
+    }, error => {
+      console.log(error)
+      window.alert(error.error)});
+    
+  }
+
+  ngOnInit(): void {
+    this.invoiceForm = this.fb.group({
+      invoiceId: new FormControl(null, Validators.required),
+      customerName: new FormControl(null, Validators.required),
+      dateTime: new FormControl(null, Validators.required),
+      itemsCount: new FormControl(null, Validators.required),
+      totalAmount: new FormControl(null, Validators.required),
+      invoiceDetails: this.fb.array([this.addDeailsFormGroup()])
+    })
+  }
+  removeDetailsButton(number: number) {
+    let items = this.invoiceForm.get('invoiceDetails') as FormArray;
+    items.removeAt(number);
+  }
+  addDeailsFormGroup(): FormGroup {
+    return this.fb.group({
+      item: new FormControl(null, Validators.required),
+      price: new FormControl(null, Validators.required),
+      quantity: new FormControl(null, Validators.required),
+      totalAmount: new FormControl(null, Validators.required)
     })
   }
 
-  
-  DeleteInvoice(){
-    this._InvoiceService.sendDeleteRequest(this.deleteId).subscribe((data)=>{
-      window.alert("invoice has been deleted..")
-    })
+
+  addDetailsButton(): void {
+    this.invoiceForm.get('invoiceDetails').push(this.addDeailsFormGroup()) as FormArray;
   }
 
-  public addForm: FormGroup = new FormGroup({
-    invoiceId: new FormControl(null, Validators.required),
-    customerName: new FormControl(null, Validators.required),
-    dateTime: new FormControl(null, Validators.required),
-    itemsCount: new FormControl(null, Validators.required),
-    totalAmount: new FormControl(null, Validators.required),
-    item: new FormControl(null, Validators.required),
-    price: new FormControl(null, Validators.required),
-    quantity: new FormControl(null, Validators.required),
-    itemAmount: new FormControl(null, Validators.required)
-  });
-
-  add(addForm: FormGroup) {
+  addInvoice(data: FormGroup) {
     const { invoiceId, customerName, dateTime, itemsCount,
-      totalAmount, item, price, quantity, itemAmount } = addForm.value
+      totalAmount, invoiceDetails } = data.value
 
     const formatedData = {
       invoiceId,
@@ -69,26 +81,25 @@ export class InvoiceComponent implements OnInit {
       dateTime,
       itemsCount,
       totalAmount,
-      invoiceDetails: [{
-        item,
-        price,
-        quantity,
-        itemAmount
-      }]
-    }    
+      invoiceDetails: invoiceDetails
+    }
 
     console.log(formatedData);
 
     this._InvoiceService.sendPostRequest(formatedData).subscribe((response: any) => {
-      console.warn("Resulted Object : ", response);
+      window.alert("invoice has been added successfully ..")
+      this.clearButton();
+      this.GetInvoice(invoiceId)
+    }, (error) => {
+      console.log(error.error);
+      window.alert(error.error)
     });
-
-    window.alert("Invoice has been added ..");
   }
 
-  update(addForm: FormGroup){
-    const  { invoiceId, customerName, dateTime, itemsCount,
-      totalAmount, item, price, quantity, itemAmount } = addForm.value
+
+  updateInvoice(data: FormGroup) {
+    const { invoiceId, customerName, dateTime, itemsCount,
+      totalAmount, invoiceDetails } = data.value
 
     const formatedData = {
       invoiceId,
@@ -96,38 +107,45 @@ export class InvoiceComponent implements OnInit {
       dateTime,
       itemsCount,
       totalAmount,
-      invoiceDetails: [{
-        item,
-        price,
-        quantity,
-        itemAmount
-      }]
-    }  
-    
+      invoiceDetails: invoiceDetails
+    }
+
     console.log(formatedData)
-    
-    this._InvoiceService.sendUpdateRequest(formatedData, this.updatedId).subscribe((response: any)=> {
-      console.warn(response);
+
+    this._InvoiceService.sendUpdateRequest(formatedData, this.invoiceId).subscribe((response: any) => {
+      console.log(response);
+      window.alert("invoice has been updated ..");
+    },(error) => {
+      console.log(error.error);
+      window.alert(error.error);
+    });
+  }
+
+
+  DeleteInvoice() {
+    this._InvoiceService.sendDeleteRequest(this.deleteId).subscribe((data) => {
+      window.alert("invoice has been deleted..");
+    },(error) => {
+      console.log(error.error);
+      window.alert(error.error);
     })
-    window.alert("Invoice updated ..")
   }
 
-  AddButton(){
+
+  AddButton() {
     this.updateFlag = false;
-    return this.addFlag = true; 
+    return this.addFlag = true;
   }
 
-  UpdateButton(){
+
+
+  UpdateButton() {
     this.addFlag = false;
     return this.updateFlag = true;
   }
 
-  clear(){
-    this.addForm.reset();
-  }
-
-
-  ngOnInit(): void {
+  clearButton() {
+    this.invoiceForm.reset();
   }
 
 }
