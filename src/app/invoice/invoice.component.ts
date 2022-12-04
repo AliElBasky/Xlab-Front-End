@@ -29,17 +29,22 @@ export class InvoiceComponent implements OnInit {
 
   }
 
-  GetInvoice(id: any) {
-    this._InvoiceService.sendGetRequest(id).subscribe((data) => {
-      this.invoiceId = data.invoiceId;
-      this.customerName = data.customerName;
-      this.date = data.dateTime;
-      this.itemsCount = data.itemsCount;
-      this.totalAmount = data.totalAmount;
-      this.getInvoiceDetails = data.invoiceDetails
-    }, error => {
-      console.log(error)
-      window.alert(error.error)});
+  GetInvoice(id: any) {    
+    if (id == null || id.startsWith(" ")) {
+      window.alert("please insert the Id ..")
+    }
+    else{
+      this._InvoiceService.sendGetRequest(id).subscribe((data) => {
+        this.invoiceId = data.invoiceId;
+        this.customerName = data.customerName;
+        this.date = data.dateTime;
+        this.itemsCount = data.itemsCount;
+        this.totalAmount = data.totalAmount;
+        this.getInvoiceDetails = data.invoiceDetails
+      }, response => {
+        console.log(response)
+        window.alert(response.error)});
+    }
     
   }
 
@@ -66,7 +71,6 @@ export class InvoiceComponent implements OnInit {
     })
   }
 
-
   addDetailsButton(): void {
     this.invoiceForm.get('invoiceDetails').push(this.addDeailsFormGroup()) as FormArray;
   }
@@ -85,15 +89,20 @@ export class InvoiceComponent implements OnInit {
     }
 
     console.log(formatedData);
-
-    this._InvoiceService.sendPostRequest(formatedData).subscribe((response: any) => {
-      window.alert("invoice has been added successfully ..")
-      this.clearButton();
-      this.GetInvoice(invoiceId)
-    }, (error) => {
-      console.log(error.error);
-      window.alert(error.error)
-    });
+    if (invoiceId == undefined || invoiceId.startsWith(" ")) {
+      window.alert("please insert the id ..")
+      
+    }else{
+      this._InvoiceService.sendPostRequest(formatedData).subscribe((response: any) => {
+        window.alert("invoice has been added successfully ..")
+        this.clearButton();
+        this.GetInvoice(invoiceId)
+      }, (response) => {
+        console.log(response.error);
+        window.alert(response.error)
+      });
+    }
+    
   }
 
 
@@ -112,22 +121,27 @@ export class InvoiceComponent implements OnInit {
 
     console.log(formatedData)
 
-    this._InvoiceService.sendUpdateRequest(formatedData, this.invoiceId).subscribe((response: any) => {
-      console.log(response);
-      window.alert("invoice has been updated ..");
-    },(error) => {
-      console.log(error.error);
-      window.alert(error.error);
-    });
+    if (invoiceId == undefined || invoiceId.startsWith(" ")) {
+      window.alert("please insert the id ..")
+    } else {
+      this._InvoiceService.sendUpdateRequest(formatedData, this.invoiceId).subscribe((response: any) => {
+        console.log(response);
+        window.alert("invoice has been updated ..");
+        this.GetInvoice(invoiceId);
+      },(response) => {
+        console.log(response.error);
+        window.alert(response.error);
+      });
+    }
   }
 
 
   DeleteInvoice() {
     this._InvoiceService.sendDeleteRequest(this.deleteId).subscribe((data) => {
       window.alert("invoice has been deleted..");
-    },(error) => {
-      console.log(error.error);
-      window.alert(error.error);
+    },(response) => {
+      console.log(response.error);
+      window.alert(response.error);
     })
   }
 
